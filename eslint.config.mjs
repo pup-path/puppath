@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Reference wireframes from the design phase, not part of the app.
+    "docs/**",
   ]),
 ]);
 
