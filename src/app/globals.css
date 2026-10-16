@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
+/* Northern Beaches Groodles brand, lifted from the PupPath wireframes.
+   primary #E8D4C4 peach, secondary #E89B3C orange sun, accent #5D3A4D plum,
+   cream #F5EDE6, dark #3D2A35 */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --peach: #e8d4c4;
+  --peach-soft: #fce7d6;
+  --sun: #e89b3c;
+  --sun-soft: #fef3e2;
+  --plum: #5d3a4d;
+  --cream: #f5ede6;
+  --ink: #3d2a35;
+
+  --background: #faf6f2;
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --muted: #f3ebe4;
+  --muted-foreground: #7a6a72;
+  --border: #ead9cc;
+  --ring: var(--sun);
+  --radius: 0.75rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-peach: var(--peach);
+  --color-peach-soft: var(--peach-soft);
+  --color-sun: var(--sun);
+  --color-sun-soft: var(--sun-soft);
+  --color-plum: var(--plum);
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply text-ink;
+  }
 }
