@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   // Internal CRM: every page is per-user and dynamic. Cache Components adds
   // Suspense/static-shell rules that buy nothing here, so leave them off.
   cacheComponents: false,
+  experimental: {
+    // Photo uploads go through server actions after client-side resizing.
+    serverActions: { bodySizeLimit: "8mb" },
+  },
   turbopack: {
     rules: {
       "*.css": {

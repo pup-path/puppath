@@ -13,7 +13,7 @@ Design and build plan: see the `docs/` folder in the Dog CRM project (data model
 | 2 Comms timeline | Done | Log notes, messages, calls, emails, meetings; stage and puppy events logged automatically |
 | 3 Public forms + email | Done | `/enquire` and `/apply` (question set in `src/lib/application-form.ts`), honeypot + optional Turnstile, Resend confirmations and breeder notifications once keys are set |
 | 4 Waitlist | Done | Ordered list, move up/down, renumber, filters by sex and colour |
-| 5 Dogs, litters, puppies | Stub | Schema exists |
+| 5 Dogs, litters, puppies | Done | Dog profiles with photo and breeding history; litter timeline with status strip, record birth, puppy cards, weights, photos, linked waitlist |
 | 6 Matching | Stub | Schema and triggers exist |
 | 6b Litter updates | Stub | Schema exists |
 | 7 Dashboard, settings | Partial | Home needs-attention list done; settings stub |
