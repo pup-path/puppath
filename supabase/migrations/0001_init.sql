@@ -1,5 +1,5 @@
 -- PupPath MVP schema v1
--- Paste into the Supabase SQL Editor and run once. Re-running is not safe.
+-- Applied to the live project on 16 Oct 2026 via the Supabase connector. Do not re-run.
 -- Source of truth for the design: docs/01-data-model-and-build-order.md
 
 create extension if not exists "pgcrypto";

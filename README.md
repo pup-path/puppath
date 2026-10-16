@@ -20,7 +20,7 @@ Design and build plan: see the `docs/` folder in the Dog CRM project (data model
 
 ## One-time setup
 
-1. **Supabase**: create a project (Sydney region). SQL Editor → paste `supabase/migrations/0001_init.sql` → Run, once. Later migrations go in the same folder, numbered, and are run the same way.
+1. **Supabase**: project `dsdtqlxbjjyzfvsdrqqd` (ap-southeast-1). Migrations `0001` and `0002` are already applied. New migrations go in `supabase/migrations/`, numbered, and are applied through the Supabase connector (or pasted into the SQL Editor).
 2. **Logins**: `0001_init.sql` invites `jonathan.p.moody@gmail.com` as owner. Add Jen:
    ```sql
    insert into member_invites (email, breeder_id, full_name, role)
