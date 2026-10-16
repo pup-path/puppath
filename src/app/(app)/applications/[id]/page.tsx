@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Mail, Phone, MapPin } from "lucide-react";
 import { getApplication } from "@/lib/data/applications";
+import { listAllocationsForApplication } from "@/lib/data/breeding";
+import { Badge } from "@/components/ui/badge";
+import { ALLOCATION_META } from "@/lib/litters";
 import { StageBadge } from "@/components/stage-badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +22,9 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
   if (!result) notFound();
   const { application: app, activities } = result;
   const person = app.people;
+  const allocations = await listAllocationsForApplication(id);
+  const match = allocations.find((a) => ["offered", "accepted", "confirmed", "collected"].includes(a.status)) ?? null;
+  const pastOffers = allocations.filter((a) => a !== match);
 
   const homeEntries = Object.entries(app.home ?? {});
   const answerEntries = Object.entries(app.answers ?? {});
@@ -90,6 +96,30 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
               <p className="text-sm text-red-900">
                 {STAGE_META[app.stage].label} {fmtDate(app.closed_at)}{app.close_reason ? `: ${app.close_reason}` : ""}
               </p>
+            </Card>
+          )}
+
+          {(match || pastOffers.length > 0) && (
+            <Card className={match ? "border-green-200 bg-green-50" : undefined}>
+              <CardHeader className="mb-2">
+                <CardTitle>Puppy match</CardTitle>
+                {match && <Badge tone={ALLOCATION_META[match.status].tone}>{ALLOCATION_META[match.status].label}</Badge>}
+              </CardHeader>
+              {match ? (
+                <p className="text-sm text-ink">
+                  <Link href={`/litters/${match.puppy.litter.id}/puppies/${match.puppy.id}`} className="font-semibold hover:underline">{match.puppy.temp_name ?? (match.puppy.collar_colour ? `${match.puppy.collar_colour} collar` : "Puppy")}</Link>
+                  {match.puppy.sex ? ` (${match.puppy.sex}${match.puppy.colour ? `, ${match.puppy.colour}` : ""})` : ""} from litter{" "}
+                  <Link href={`/litters/${match.puppy.litter.id}/matching`} className="font-semibold hover:underline">{match.puppy.litter.code}</Link>.{" "}
+                  {match.status === "collected" ? `Went home ${fmtDate(match.collected_at)}.` : match.puppy.litter.go_home_date ? `Go home ${fmtDate(match.puppy.litter.go_home_date)}.` : ""}
+                  {match.notes && <span className="block text-xs text-muted-foreground">{match.notes}</span>}
+                </p>
+              ) : null}
+              {pastOffers.length > 0 && (
+                <ul className="mt-2 space-y-0.5 text-xs text-muted-foreground">
+                  {pastOffers.map((a) => <li key={a.id}>{ALLOCATION_META[a.status].label} {a.puppy.temp_name ?? a.puppy.collar_colour ?? "puppy"} ({a.puppy.litter.code}) {fmtDate(a.responded_at ?? a.offered_at)}</li>)}
+                </ul>
+              )}
+              {match && match.status !== "collected" && <p className="mt-2 text-xs text-muted-foreground">Change the match from the litter&apos;s matching page.</p>}
             </Card>
           )}
 

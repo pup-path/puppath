@@ -1,5 +1,5 @@
 import type { BadgeTone } from "@/components/ui/badge";
-import type { LitterStatus, PuppyStatus } from "./types";
+import type { AllocationStatus, LitterStatus, PuppyStatus } from "./types";
 
 export const LITTER_STATUSES: LitterStatus[] = ["planned", "confirmed", "born", "weaning", "ready", "complete"];
 
@@ -24,3 +24,32 @@ export const COLLAR_COLOURS = ["Pink", "Blue", "Green", "Red", "Yellow", "Purple
 
 export const GESTATION_DAYS = 63;
 export const GO_HOME_WEEKS = 8;
+
+export const ALLOCATION_META: Record<AllocationStatus, { label: string; tone: BadgeTone; hint: string }> = {
+  offered: { label: "Offered", tone: "yellow", hint: "Waiting to hear back from the family." },
+  accepted: { label: "Accepted", tone: "green", hint: "They said yes. Confirm once the balance or paperwork is sorted." },
+  confirmed: { label: "Confirmed", tone: "green", hint: "Locked in. Mark collected on go-home day." },
+  collected: { label: "Gone home", tone: "gray", hint: "Puppy has gone home." },
+  declined: { label: "Declined", tone: "red", hint: "The family passed on this puppy." },
+  cancelled: { label: "Cancelled", tone: "gray", hint: "Offer withdrawn." },
+};
+
+/** What a breeder can do next with an allocation in a given state. */
+export const ALLOCATION_NEXT: Record<AllocationStatus, { to: AllocationStatus; label: string; variant?: "default" | "outline" | "ghost" | "destructive" }[]> = {
+  offered: [
+    { to: "accepted", label: "They said yes" },
+    { to: "declined", label: "They passed", variant: "outline" },
+    { to: "cancelled", label: "Withdraw offer", variant: "ghost" },
+  ],
+  accepted: [
+    { to: "confirmed", label: "Confirm match" },
+    { to: "cancelled", label: "Cancel", variant: "ghost" },
+  ],
+  confirmed: [
+    { to: "collected", label: "Gone home today" },
+    { to: "cancelled", label: "Cancel", variant: "ghost" },
+  ],
+  collected: [],
+  declined: [],
+  cancelled: [],
+};

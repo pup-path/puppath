@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { listApplications } from "@/lib/data/applications";
+import { listOpenOffers } from "@/lib/data/breeding";
+import { Badge } from "@/components/ui/badge";
+import { ALLOCATION_META } from "@/lib/litters";
+import { fmtDate } from "@/lib/format";
 import { getMember } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +17,7 @@ export const metadata = { title: "Home" };
 
 export default async function HomePage() {
   const member = await getMember();
-  const apps = await listApplications();
+  const [apps, offers] = await Promise.all([listApplications(), listOpenOffers()]);
 
   const newEnquiries = apps.filter((a) => a.stage === "enquiry");
   const toReview = apps.filter((a) => a.stage === "applied" || a.stage === "reviewing");
@@ -34,6 +38,28 @@ export default async function HomePage() {
         <AttentionCard title="Deposit requested" body="Approved, waiting on the bank transfer." items={awaitingDeposit} empty="No deposits outstanding." />
         <AttentionCard title="Gone quiet" body="No contact for a week or more." items={quiet} empty="Everyone has been spoken to this week." showAgo />
       </div>
+
+      {offers.length > 0 && (
+        <Card className="mt-4">
+          <CardHeader className="mb-2">
+            <div>
+              <CardTitle>Puppy offers in play</CardTitle>
+              <p className="text-xs text-muted-foreground">Offered or accepted, not yet confirmed.</p>
+            </div>
+            <span className="rounded-full bg-sun-soft px-2.5 py-0.5 text-sm font-semibold text-orange-800">{offers.length}</span>
+          </CardHeader>
+          <ul className="divide-y divide-border">
+            {offers.map((o) => (
+              <li key={o.id}>
+                <Link href={`/litters/${o.puppy.litter.id}/matching`} className="flex items-center justify-between gap-2 py-2 text-sm hover:text-orange-700">
+                  <span className="truncate"><span className="font-medium">{fullName(o.application.people)}</span> · {o.puppy.temp_name ?? (o.puppy.collar_colour ? `${o.puppy.collar_colour} collar` : "puppy")} ({o.puppy.litter.code})</span>
+                  <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">{fmtDate(o.offered_at)}<Badge tone={ALLOCATION_META[o.status].tone}>{ALLOCATION_META[o.status].label}</Badge></span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <div className="mt-6 flex flex-wrap gap-2">
         <Button asChild><Link href="/pipeline">Open the pipeline <ArrowRight /></Link></Button>

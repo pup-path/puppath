@@ -75,3 +75,56 @@ export async function getLitter(id: string) {
     puppies: pups.map((p) => ({ ...p, allocation: allocByPuppy.get(p.id) ?? null, weights: weightsByPuppy.get(p.id) ?? [] })) as PuppyWithAllocation[],
   };
 }
+
+// ---------------------------------------------------------------------------
+// Matching
+// ---------------------------------------------------------------------------
+
+export type AllocationWithApplication = Allocation & { application: ApplicationWithPerson };
+
+/** Everything the matching page needs: the litter, its puppies, every allocation ever made on them, and who could still be offered a puppy. */
+export async function getMatching(litterId: string) {
+  const base = await getLitter(litterId);
+  if (!base) return null;
+  const supabase = await createClient();
+  const pupIds = base.puppies.map((p) => p.id);
+  const [{ data: allocations }, { data: candidates }] = await Promise.all([
+    pupIds.length
+      ? supabase.from("allocations").select("*, application:applications(*, people(*))").in("puppy_id", pupIds).order("offered_at", { ascending: false })
+      : Promise.resolve({ data: [] as unknown[] }),
+    supabase.from("applications").select("*, people(*)").in("stage", ["waitlisted", "approved", "matched"]).order("waitlist_position", { ascending: true, nullsFirst: false }),
+  ]);
+  return {
+    ...base,
+    history: (allocations ?? []) as AllocationWithApplication[],
+    candidates: (candidates ?? []) as ApplicationWithPerson[],
+  };
+}
+
+export type AllocationWithPuppy = Allocation & { puppy: Puppy & { litter: { id: string; code: string; go_home_date: string | null } } };
+
+/** Allocations for one application, newest first, with the puppy and litter. */
+export async function listAllocationsForApplication(applicationId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("allocations")
+    .select("*, puppy:puppies(*, litter:litters(id, code, go_home_date))")
+    .eq("application_id", applicationId)
+    .order("offered_at", { ascending: false });
+  return (data ?? []) as unknown as AllocationWithPuppy[];
+}
+
+/** Open offers nobody has answered yet, for the home page. */
+export async function listOpenOffers() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("allocations")
+    .select("id, status, offered_at, application:applications(id, people(first_name, last_name)), puppy:puppies(id, temp_name, collar_colour, litter:litters(id, code))")
+    .in("status", ["offered", "accepted"])
+    .order("offered_at");
+  return (data ?? []) as unknown as {
+    id: string; status: "offered" | "accepted"; offered_at: string;
+    application: { id: string; people: { first_name: string; last_name: string | null } };
+    puppy: { id: string; temp_name: string | null; collar_colour: string | null; litter: { id: string; code: string } };
+  }[];
+}
